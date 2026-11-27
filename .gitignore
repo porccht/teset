@@ -1,0 +1,5 @@
+locketlam_session.json
+my_moments_*.json
+__pycache__/
+*.pyc
+.env
