@@ -1,1 +1,1832 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>TLTH LOCKET — iOS 26 Liquid Glass</title>
+  <style>
+    :root {
+      --bg-stage: radial-gradient(circle at 50% 18%, #1a1508 0%, #050507 68%, #000000 100%);
+      --glass-alpha: 0.14;
+      --glass-dark-alpha: 0.74;
+      --glass-blur: 28px;
+      --glass-sat: 200%;
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.36), inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+      --accent: #f7b500;
+      --accent-secondary: #ff8c00;
+      --ring-grad: linear-gradient(135deg, #f6c453, #ff9f0a);
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.65);
+      --danger: #ff453a;
+      --rec-progress: 0deg;
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
+      --spring-bloom: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
 
+    /* Nền sâu chuyển sắc nhẹ đồng bộ viền khung */
+    body[data-theme="gold"] { --bg-stage: radial-gradient(circle at 50% 18%, #261b04 0%, #080602 70%); --accent: #ffb800; --accent-secondary: #fff4d7; --ring-grad: linear-gradient(to bottom right, #fff4d7, #ffb800); }
+    body[data-theme="hotToGo"] { --bg-stage: radial-gradient(circle at 50% 18%, #2d061a 0%, #080205 70%); --accent: #ff007a; --accent-secondary: #ff3f04; --ring-grad: linear-gradient(to bottom left, #ff007a, #ff3f04); }
+    body[data-theme="sunrise"] { --bg-stage: radial-gradient(circle at 50% 18%, #2e1116 0%, #080304 70%); --accent: #ff763b; --accent-secondary: #fe526b; --ring-grad: linear-gradient(to bottom right, #ff763b, #fe526b); }
+    body[data-theme="jewelry"] { --bg-stage: radial-gradient(circle at 50% 18%, #291f05 0%, #070602 70%); --accent: #ffb800; --accent-secondary: #fff1cd; --ring-grad: linear-gradient(to bottom, #fff1cd, #ffb800); }
+    body[data-theme="mist"] { --bg-stage: radial-gradient(circle at 50% 18%, #0a2423 0%, #020808 70%); --accent: #5ed8ff; --accent-secondary: #88ff6a; --ring-grad: linear-gradient(to bottom, #5ed8ff, #88ff6a); }
+    body[data-theme="sea"] { --bg-stage: radial-gradient(circle at 50% 18%, #071b33 0%, #02060d 70%); --accent: #12f3ff; --accent-secondary: #1269ff; --ring-grad: linear-gradient(to bottom right, #12f3ff, #1269ff); }
+    body[data-theme="neptune"] { --bg-stage: radial-gradient(circle at 50% 18%, #190d36 0%, #05020d 70%); --accent: #aa3fff; --accent-secondary: #19f1ff; --ring-grad: linear-gradient(120deg, #545bff, #aa3fff, #19f1ff); }
+    body[data-theme="goulash"] { --bg-stage: radial-gradient(circle at 50% 18%, #1e0833 0%, #06020a 70%); --accent: #a44bff; --accent-secondary: #5700af; --ring-grad: linear-gradient(to bottom, #b693ff, #8033ff); }
+    body[data-theme="orbit"] { --bg-stage: radial-gradient(circle at 50% 18%, #0e222b 0%, #03070a 70%); --accent: #2ce9f1; --accent-secondary: #fa7dad; --ring-grad: linear-gradient(to bottom right, #2ce9f1, #ba76d0, #fa7dad); }
+    body[data-theme="bubbleGum"] { --bg-stage: radial-gradient(circle at 50% 18%, #2e0b22 0%, #080206 70%); --accent: #ff7ecc; --accent-secondary: #ff6ac4; --ring-grad: linear-gradient(to bottom, #ff7ecc, #ff6ac4); }
+    body[data-theme="cloud"] { --bg-stage: radial-gradient(circle at 50% 18%, #0f202e 0%, #03060a 70%); --accent: #8bd8ff; --accent-secondary: #ffffff; --ring-grad: linear-gradient(to bottom right, #ffffff, #8bd8ff); }
+    body[data-theme="crystal"] { --bg-stage: radial-gradient(circle at 50% 18%, #1b1d21 0%, #050608 70%); --accent: #e5e7eb; --accent-secondary: #a4a4a4; --ring-grad: linear-gradient(to bottom, #ffffff, #a4a4a4); }
+    body[data-theme="midnight"] { --bg-stage: #000000; --accent: #f6c453; --accent-secondary: #a4a4a4; --ring-grad: linear-gradient(to bottom, #ffffff, #a4a4a4); }
+
+    body[data-surface="solid"] .ios26-glass,
+    body[data-surface="solid"] .ios26-pill,
+    body[data-lite="true"] .ios26-glass,
+    body[data-lite="true"] .ios26-pill {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    body[data-surface="solid"] .ios26-glass { background: rgba(32, 34, 40, 0.96); }
+    body[data-surface="solid"] .ios26-pill { background: rgba(24, 25, 30, 0.97); }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100dvh;
+      background-color: #000000;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+    }
+
+    .ios26-glass {
+      background: rgba(255, 255, 255, var(--glass-alpha));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shine), 0 10px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .ios26-pill {
+      background: rgba(22, 24, 30, var(--glass-dark-alpha));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shine), 0 14px 36px rgba(0, 0, 0, 0.55);
+    }
+
+    @keyframes kineticReveal {
+      from { opacity: 0; transform: translate3d(0, 10px, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    @keyframes rippleWave {
+      from { opacity: 0.6; transform: translate3d(-50%, -50%, 0) scale(0.2); }
+      to { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(2.8); }
+    }
+
+    .kinetic-enter { animation: kineticReveal 0.28s var(--spring) both; will-change: transform, opacity; }
+
+    .prismatic-btn {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      background-image: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: #111114;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s var(--spring-bloom), opacity 0.2s ease;
+    }
+    .prismatic-btn:active { transform: scale(0.94); }
+    .prismatic-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .ripple-wave {
+      position: absolute; width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55); pointer-events: none;
+      animation: rippleWave 0.5s var(--spring) forwards;
+    }
+
+    .banner-notice {
+      position: fixed; top: 62px; left: 50%; z-index: 95;
+      max-width: calc(100vw - 32px); padding: 10px 20px; border-radius: 999px;
+      font-size: 0.88rem; font-weight: 700; color: #ffffff;
+      opacity: 0; pointer-events: none;
+      transform: translate3d(-50%, -14px, 0) scale(0.92);
+      transition: transform 0.28s var(--spring-bloom), opacity 0.22s ease;
+    }
+    .banner-notice.show { opacity: 1; pointer-events: auto; transform: translate3d(-50%, 0, 0) scale(1); }
+    .banner-notice.is-error { border-color: rgba(255, 69, 58, 0.75); }
+    .banner-notice.is-success { border-color: rgba(48, 209, 88, 0.75); }
+
+    .app-shell {
+      width: 100%; max-width: 430px; min-height: 100dvh;
+      background: var(--bg-stage);
+      position: relative; display: flex; flex-direction: column;
+      padding-bottom: 96px;
+    }
+
+    .topbar {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px 10px; position: sticky; top: 0; z-index: 20;
+    }
+    .top-btn {
+      width: 42px; height: 42px; border-radius: 999px; color: #ffffff;
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .friends-pill {
+      height: 40px; padding: 0 18px; border-radius: 999px; color: #ffffff;
+      font-size: 0.92rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    }
+    .avatar-circle {
+      width: 42px; height: 42px; border-radius: 999px; overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.6); background-color: #1c1c1e;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #ffffff; cursor: pointer; padding: 0;
+    }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Camera Live & Compose 1:1 */
+    .cam-wrap { display: none; width: 100%; padding: 6px 12px 0; }
+    .cam-wrap.active { display: block; }
+
+    .cam-box {
+      position: relative; width: 100%; aspect-ratio: 1 / 1;
+      border-radius: 46px; padding: 3.5px;
+      background-image: var(--ring-grad);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+    }
+    /* Tiến trình quay đồng màu chủ đề ở viền khung camera */
+    .cam-box.is-recording {
+      background-image: conic-gradient(from 0deg, var(--accent) var(--rec-progress), rgba(255, 255, 255, 0.16) 0deg);
+    }
+
+    .frame-inner {
+      position: relative; width: 100%; height: 100%;
+      border-radius: 42.5px; overflow: hidden; background-color: #0b0c0f;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cam-box video, .cam-box img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    #camStreamEl.is-mirrored { transform: scaleX(-1); }
+
+    #camHint {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 0 28px;
+      font-size: 0.9rem; color: var(--muted); pointer-events: none; z-index: 4;
+    }
+
+    .frame-overlay-preview {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 5; object-fit: cover; display: none;
+    }
+
+    .flash-btn {
+      position: absolute; top: 16px; left: 16px; width: 38px; height: 38px;
+      border-radius: 999px; color: #ffffff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 8;
+    }
+
+    /* Nút thời lượng quay góc phải khung camera */
+    .duration-btn {
+      position: absolute; top: 16px; right: 16px; height: 34px; padding: 0 12px;
+      border-radius: 999px; color: #ffffff; font-size: 0.82rem; font-weight: 800;
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; z-index: 8;
+    }
+
+    /* Nút mở Khung ảnh chủ đề góc dưới phải */
+    .frame-pick-btn {
+      position: absolute; bottom: 16px; right: 16px; width: 38px; height: 38px;
+      border-radius: 999px; color: #ffffff; font-size: 1rem;
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; z-index: 8;
+    }
+
+    .mode-switch-pill {
+      position: absolute; bottom: 16px; left: 50%; transform: translate3d(-50%, 0, 0);
+      display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; z-index: 8;
+    }
+    .mode-icon-btn {
+      width: 40px; height: 32px; border-radius: 999px; border: none; background: transparent;
+      color: rgba(255, 255, 255, 0.8); display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .mode-icon-btn.active { background-color: var(--accent); color: #111114; }
+
+    /* Thanh Zoom (0.5x, 1x, 2x) ngay trên nút chụp */
+    .zoom-bar {
+      display: flex; justify-content: center; gap: 8px; margin-top: 12px;
+    }
+    .zoom-pill {
+      display: inline-flex; gap: 4px; padding: 4px 6px; border-radius: 999px;
+    }
+    .zoom-opt {
+      min-width: 38px; height: 28px; border-radius: 999px; border: none; background: transparent;
+      color: rgba(255, 255, 255, 0.72); font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    }
+    .zoom-opt.active { background: rgba(255, 255, 255, 0.22); color: var(--accent); }
+
+    .Upload_capture-row__qGrI5 {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px 6px;
+    }
+    .Upload_thumb__4ah12 {
+      width: 48px; height: 48px; border-radius: 14px; overflow: hidden;
+      border: none; background: transparent; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #ffffff;
+    }
+    .Upload_thumb__4ah12 img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+
+    .Upload_btn-capture__FEUTK {
+      width: 80px; height: 80px; border-radius: 999px; border: 4px solid var(--accent);
+      padding: 5px; background-color: #000000; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform 0.2s var(--spring-bloom);
+    }
+    .Upload_btn-capture__FEUTK:active { transform: scale(0.92); }
+    .Upload_capture-inner__FphLJ {
+      width: 100%; height: 100%; border-radius: 999px; background-color: #ffffff;
+      transition: all 0.22s var(--spring);
+    }
+    .Upload_btn-capture__FEUTK.is-recording .Upload_capture-inner__FphLJ {
+      width: 30px; height: 30px; border-radius: 9px; background-color: var(--accent);
+    }
+    .Upload_flip__KjrXu {
+      width: 48px; height: 48px; border-radius: 999px; border: none; background: transparent;
+      color: #ffffff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .history-btn {
+      display: block; margin: 14px auto 0; background: none; border: none;
+      color: #ffffff; font-size: 0.96rem; font-weight: 700; cursor: pointer;
+    }
+
+    /* Sau khi chụp */
+    .compose-view { display: none; width: 100%; padding: 6px 12px 0; flex-direction: column; gap: 12px; }
+    .compose-view.active { display: flex; }
+    .compose-recipient-heading { text-align: center; font-weight: 800; font-size: 1.05rem; margin: 2px 0 4px; }
+
+    .caption-pill-input {
+      position: absolute; bottom: 18px; left: 50%; transform: translate3d(-50%, 0, 0);
+      min-width: 175px; max-width: 86%; padding: 10px 18px; border-radius: 999px;
+      font-size: 0.94rem; font-weight: 700; background-color: rgba(24, 24, 28, 0.72);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.24); color: #ffffff; text-align: center;
+      outline: none; z-index: 20; pointer-events: auto; user-select: text; touch-action: manipulation;
+    }
+    .caption-pill-input::placeholder { color: rgba(255, 255, 255, 0.9); }
+
+    .compose-actions-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 24px; }
+    .cancel-x { width: 48px; height: 48px; border-radius: 999px; border: none; background: transparent; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .send-arrow-btn { width: 78px; height: 78px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #111114; }
+    .aa-btn { width: 48px; height: 48px; border-radius: 999px; color: #ffffff; font-weight: 800; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    .recipient-strip { display: flex; gap: 14px; overflow-x: auto; padding: 6px 10px; scrollbar-width: none; }
+    .recipient-strip::-webkit-scrollbar { display: none; }
+    .rec-chip { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 58px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: rgba(255, 255, 255, 0.72); }
+    .rec-chip.active { color: var(--accent); }
+    .rec-avatar { width: 50px; height: 50px; border-radius: 999px; background-color: rgba(255, 255, 255, 0.14); border: 2.5px solid transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; font-weight: 700; }
+    .rec-chip.active .rec-avatar { border-color: var(--accent); }
+    .rec-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .caption-drawer { display: none; padding: 14px; border-radius: 26px; max-height: 240px; overflow-y: auto; }
+    .caption-drawer.open { display: block; animation: kineticReveal 0.25s var(--spring) both; }
+    .caption-cat-title { font-size: 0.76rem; font-weight: 800; color: var(--accent); margin: 10px 0 6px; text-transform: uppercase; }
+    .caption-cat-title:first-child { margin-top: 0; }
+    .preset-grid-pills { display: flex; flex-wrap: wrap; gap: 7px; }
+    .preset-tag { padding: 7px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; color: #ffffff; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.22); background-color: rgba(255, 255, 255, 0.12); }
+
+    /* Thanh điều hướng */
+    .LocketNav_pill__ei2q3 {
+      position: fixed; bottom: 14px; left: 50%; transform: translate3d(-50%, 0, 0);
+      width: calc(100% - 64px); max-width: 310px; height: 58px; border-radius: 999px;
+      padding: 6px; display: flex; align-items: center; justify-content: space-between; z-index: 25;
+    }
+    .LocketNav_btn__j9V0U {
+      position: relative; overflow: hidden; flex: 1; height: 46px; border-radius: 999px;
+      border: none; background: transparent; color: rgba(255, 255, 255, 0.68);
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .LocketNav_btn__j9V0U.LocketNav_active__qa3bp {
+      background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.12));
+      color: #ffffff;
+    }
+
+    /* Feed, Grid & Memories */
+    .feed-section, .memories-section, .chat-section {
+      display: none; width: 100%; padding: 8px 14px 0; flex-direction: column; gap: 14px;
+    }
+    .feed-section.active, .memories-section.active, .chat-section.active { display: flex; }
+
+    .feed-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .feed-snap-list { display: flex; flex-direction: column; gap: 22px; scroll-snap-type: y mandatory; }
+    .feed-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .feed-grid-item { aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; background: #141518; cursor: pointer; }
+    .feed-grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .moment-card {
+      display: flex; flex-direction: column; gap: 10px; scroll-snap-align: start;
+      content-visibility: auto; contain-intrinsic-size: 460px;
+    }
+    .moment-byline { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 0.9rem; font-weight: 700; }
+    .moment-author-left { display: flex; align-items: center; gap: 8px; }
+    .mini-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: #262830; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; }
+    .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .save-moment-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+
+    .reply-bar { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; }
+    .reply-bar input { flex: 1; background: transparent; border: none; color: #ffffff; font-size: 0.9rem; outline: none; }
+    .quick-emo { background: none; border: none; font-size: 1.15rem; cursor: pointer; padding: 2px 4px; }
+
+    .calendar-month-card { width: 100%; padding: 16px; border-radius: 26px; margin-bottom: 12px; }
+    .calendar-month-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; }
+    .calendar-grid-7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; justify-items: center; align-items: center; }
+    .cal-slot { width: 40px; height: 40px; border-radius: 13px; background-color: rgba(255, 255, 255, 0.08); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--muted); cursor: pointer; }
+    .cal-slot.has-media { border: 2px solid var(--accent); }
+    .cal-slot img { width: 100%; height: 100%; object-fit: cover; }
+    .streak-summary-row { display: flex; justify-content: center; gap: 12px; font-weight: 800; font-size: 1rem; padding-bottom: 16px; }
+
+    /* Chat */
+    .search-box { width: 100%; padding: 11px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.18); background-color: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 0.92rem; outline: none; }
+    .chat-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 22px; cursor: pointer;
+      content-visibility: auto; contain-intrinsic-size: 72px;
+    }
+    .chat-avatar-box { width: 48px; height: 48px; border-radius: 999px; overflow: hidden; background: #24262e; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #e5e5ea; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.18); }
+    .chat-avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+    .chat-row-meta { flex: 1; min-width: 0; }
+    .chat-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .chat-row-name { font-weight: 700; font-size: 0.94rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-row-time { font-size: 0.76rem; color: var(--muted); flex-shrink: 0; }
+    .chat-row-sub { font-size: 0.82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .fab-new-chat {
+      position: fixed; right: 20px; bottom: 86px; width: 52px; height: 52px; border-radius: 50%;
+      display: none; align-items: center; justify-content: center; font-size: 1.25rem; z-index: 26;
+    }
+    .fab-new-chat.show { display: inline-flex; }
+
+    /* Phòng chat chi tiết */
+    .thread-screen { position: fixed; inset: 0; background-color: #000000; z-index: 65; display: none; justify-content: center; }
+    .thread-screen.open { display: flex; }
+    .thread-shell { width: 100%; max-width: 430px; height: 100dvh; display: flex; flex-direction: column; padding: 12px 14px 16px; }
+    .thread-header { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .thread-messages { flex: 1; overflow-y: auto; padding: 14px 2px; display: flex; flex-direction: column; gap: 10px; }
+    .thread-empty { text-align: center; color: var(--muted); margin-top: 36%; font-size: 0.9rem; }
+    .Chat_msg-row__kdAx7 { display: flex; align-items: center; gap: 6px; }
+    .Chat_msg-row__kdAx7.Chat_mine__qOfuk { justify-content: flex-end; }
+    .Chat_msg__AU6sH { max-width: 76%; display: flex; flex-direction: column; gap: 4px; }
+    .Chat_bubble__jpT2a { padding: 10px 14px; border-radius: 20px; background-color: #242526; color: #f5f5f5; font-size: 0.94rem; word-break: break-word; }
+    .Chat_msg-row__kdAx7.Chat_mine__qOfuk .Chat_bubble__jpT2a { background-color: #f7be4b; color: #111111; font-weight: 600; border-bottom-right-radius: 6px; }
+    .Chat_bubble__jpT2a img { max-width: 200px; border-radius: 16px; display: block; }
+    .Chat_tool__ohcz7 { width: 28px; height: 28px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.08); color: #fff; cursor: pointer; }
+    .thread-composer { display: flex; align-items: center; gap: 8px; padding-top: 8px; }
+    .thread-img-btn { width: 42px; height: 42px; border-radius: 999px; border: none; background: transparent; color: #f7be4b; font-size: 1.3rem; cursor: pointer; }
+    .thread-input-wrap { flex: 1; display: flex; align-items: center; padding: 0 14px; height: 44px; border-radius: 999px; }
+    .thread-input-wrap input { width: 100%; background: transparent; border: none; color: #ffffff; font-size: 0.92rem; outline: none; }
+    .thread-send-circle { width: 44px; height: 44px; border-radius: 999px; font-weight: 800; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; }
+
+    /* Hồ sơ & Dialogs */
+    .profile-drawer { position: fixed; inset: 0; background-color: #07080a; z-index: 60; display: none; justify-content: center; overflow-y: auto; }
+    .profile-drawer.open { display: flex; }
+    .profile-inner { width: 100%; max-width: 430px; padding: 14px 16px 48px; display: flex; flex-direction: column; gap: 14px; }
+    .profile-head-row { display: flex; align-items: center; justify-content: space-between; }
+    .profile-hero { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 6px; }
+    .profile-hero-avatar { width: 96px; height: 96px; border-radius: 999px; overflow: hidden; border: 3px solid var(--accent); background-color: #1a1c22; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; }
+    .profile-hero-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .settings-group { border-radius: 22px; padding: 6px 14px; display: flex; flex-direction: column; }
+    .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 2px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.92rem; gap: 10px; }
+    .settings-item:last-child { border-bottom: none; }
+    .settings-item-col { flex-direction: column; align-items: stretch; }
+    .field-caption { font-size: 0.8rem; color: var(--muted); }
+    .name-pair-row { display: flex; gap: 8px; margin-top: 6px; }
+    .group-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); padding: 4px 4px 0; }
+    .save-profile-btn { margin: 10px 0 6px; padding: 12px; border-radius: 999px; width: 100%; font-size: 0.95rem; }
+    .ProfileSection_switch__U-UrR { position: relative; display: inline-block; width: 48px; height: 28px; border-radius: 999px; background-color: rgba(255, 255, 255, 0.22); cursor: pointer; }
+    .ProfileSection_switch__U-UrR::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background-color: #ffffff; transition: transform 0.24s var(--spring-bloom); }
+    .ProfileSection_switch__U-UrR.ProfileSection_on__LBazF { background-color: var(--accent); }
+    .ProfileSection_switch__U-UrR.ProfileSection_on__LBazF::after { transform: translate3d(20px, 0, 0); }
+    .about-list-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 2px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.93rem; cursor: pointer; color: #ffffff; text-decoration: none; width: 100%; background: transparent; border-left: none; border-right: none; border-top: none; }
+    .about-list-item:last-child { border-bottom: none; }
+    .danger-row { cursor: pointer; color: #ff6961; font-weight: 700; }
+
+    .Dialog_backdrop__NzZr { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.68); z-index: 80; display: none; align-items: flex-end; justify-content: center; padding: 12px; }
+    .Dialog_backdrop__NzZr.open { display: flex; }
+    .Dialog_panel__YNtOY { width: 100%; max-width: 420px; border-radius: 30px; padding: 18px; display: flex; flex-direction: column; gap: 10px; max-height: 86dvh; overflow-y: auto; }
+    .AppearanceSheet_segment__CQ0V { display: flex; gap: 6px; padding: 4px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); }
+    .AppearanceSheet_seg__Ae96d { flex: 1; padding: 9px; border-radius: 12px; border: none; background: transparent; color: rgba(255, 255, 255, 0.72); font-weight: 700; cursor: pointer; }
+    .AppearanceSheet_seg__Ae96d.AppearanceSheet_on__7utU { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
+    .AppearanceSheet_themes__QuQt { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .AppearanceSheet_theme__cEQAb { display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; }
+    .AppearanceSheet_phone__V7b9z { width: 62px; height: 98px; border-radius: 14px; padding: 6px 5px; border: 2px solid rgba(255, 255, 255, 0.16); display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+    .AppearanceSheet_theme__cEQAb.AppearanceSheet_on__7utU .AppearanceSheet_phone__V7b9z { border-color: var(--accent); }
+    .AppearanceSheet_finder__mdQPx { width: 46px; height: 46px; border-radius: 10px; background: rgba(0, 0, 0, 0.45); }
+    .AppearanceSheet_shutter__QGKJd { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2.5px solid var(--accent); }
+    .AppearanceSheet_name__VRsO7 { font-size: 0.72rem; font-weight: 600; text-align: center; }
+
+    /* Đăng nhập + Toggle mật khẩu */
+    .auth-screen { position: fixed; inset: 0; background-color: #060607; z-index: 70; display: none; justify-content: center; overflow-y: auto; }
+    .auth-screen.open { display: flex; }
+    .auth-card-wrap { width: 100%; max-width: 420px; padding: 32px 20px 36px; display: flex; flex-direction: column; align-items: center; }
+    .locket-heart-logo { width: 68px; height: 68px; border-radius: 20px; background-image: linear-gradient(135deg, #ffe680, var(--accent), #b87a00); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 14px; }
+    .auth-form-box { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+    .auth-input { width: 100%; height: 48px; padding: 0 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.14); background-color: #1a1a1d; color: #ffffff; font-size: 0.95rem; outline: none; }
+    .pass-wrap { position: relative; width: 100%; }
+    .pass-wrap input { padding-right: 46px; }
+    .pass-eye-btn {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      width: 34px; height: 34px; border: none; background: transparent; color: var(--muted);
+      font-size: 1.1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .auth-login-btn { width: 100%; height: 52px; margin-top: 12px; border-radius: 999px; font-size: 1rem; }
+
+    .sheet-choice { width: 100%; padding: 13px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.14); background-color: rgba(255, 255, 255, 0.08); color: #ffffff; font-size: 0.94rem; font-weight: 600; cursor: pointer; text-align: center; }
+    .sheet-choice.danger { color: #ff6961; }
+    .hidden-input { display: none; }
+  </style>
+</head>
+<body data-theme="default" data-surface="glass" data-lite="auto">
+  <div class="app-shell" id="appShell">
+    <header class="topbar" id="mainTopbar">
+      <button type="button" class="top-btn ios26-glass" id="btnTopRollcall" aria-label="Lịch sử">📢</button>
+      <button type="button" class="friends-pill ios26-pill" id="btnFriendsPill">
+        <span>👥</span>
+        <span id="friendsCountText">Bạn bè</span>
+      </button>
+      <button type="button" class="avatar-circle" id="btnOpenProfile" aria-label="Hồ sơ">
+        <span id="topAvatarInitials">TL</span>
+      </button>
+    </header>
+
+    <div class="banner-notice ios26-pill" id="globalNotice" role="status" aria-live="polite"></div>
+
+    <!-- CAMERA LIVE -->
+    <section class="cam-wrap active kinetic-enter" id="screenCamera">
+      <div class="cam-box" id="camBox">
+        <div class="frame-inner">
+          <video id="camStreamEl" autoplay playsinline muted class="hidden-input"></video>
+          <img id="frameOverlayPreview" class="frame-overlay-preview" alt="" />
+          <button type="button" class="flash-btn ios26-glass" id="btnFlashToggle" aria-label="Bật tắt camera">⚡</button>
+          <button type="button" class="duration-btn ios26-glass" id="btnDurationCycle" aria-label="Thời lượng quay">5s</button>
+          <span id="camHint">Chạm nút chụp để mở camera hoặc chọn thư viện</span>
+
+          <div class="mode-switch-pill ios26-pill">
+            <button type="button" class="mode-icon-btn active" id="modePhotoBtn" aria-label="Chụp ảnh">📷</button>
+            <button type="button" class="mode-icon-btn" id="modeVideoBtn" aria-label="Quay video">🎥</button>
+          </div>
+          <button type="button" class="frame-pick-btn ios26-glass" id="btnOpenFrames" aria-label="Chọn khung ảnh">🖼️</button>
+        </div>
+      </div>
+
+      <!-- Zoom 0.5x / 1x / 2x -->
+      <div class="zoom-bar">
+        <div class="zoom-pill ios26-pill">
+          <button type="button" class="zoom-opt" data-zoom="0.5">0.5×</button>
+          <button type="button" class="zoom-opt active" data-zoom="1">1×</button>
+          <button type="button" class="zoom-opt" data-zoom="2">2×</button>
+        </div>
+      </div>
+
+      <input type="file" id="mediaGalleryInput" accept="image/*,video/*" class="hidden-input" />
+
+      <div class="Upload_capture-row__qGrI5">
+        <button type="button" class="Upload_thumb__4ah12" id="btnGalleryPick" aria-label="Thư viện">
+          <img id="galleryThumbPreview" src="" alt="" class="hidden-input" />
+          <span id="galleryFallbackIcon">🖼️</span>
+        </button>
+
+        <button type="button" class="Upload_btn-capture__FEUTK" id="btnCaptureAction" aria-label="Chụp hoặc quay">
+          <span class="Upload_capture-inner__FphLJ"></span>
+        </button>
+
+        <button type="button" class="Upload_flip__KjrXu" id="btnSwitchCam" aria-label="Đổi camera">🔄</button>
+      </div>
+
+      <button type="button" class="history-btn" id="btnHistoryJump">Lịch sử ⌄</button>
+    </section>
+
+    <!-- SAU KHI CHỤP (GỬI ĐẾN...) -->
+    <section class="compose-view kinetic-enter" id="screenCompose">
+      <div class="compose-recipient-heading">Gửi đến...</div>
+      <div class="cam-box" id="composeBox">
+        <div class="frame-inner">
+          <img id="finalPhotoEl" alt="" class="hidden-input" />
+          <video id="finalVideoEl" autoplay muted loop playsinline class="hidden-input"></video>
+          <input type="text" class="caption-pill-input" id="composeCaptionInput" placeholder="Thêm một tin nhắn" maxlength="120" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="caption-drawer ios26-pill" id="captionDrawer">
+        <div id="presetTagsWrap"></div>
+      </div>
+
+      <div class="compose-actions-row">
+        <button type="button" class="cancel-x" id="btnCancelCompose" aria-label="Huỷ">✕</button>
+        <button type="button" class="send-arrow-btn prismatic-btn" id="btnSubmitMoment" aria-label="Gửi">➤</button>
+        <button type="button" class="aa-btn ios26-glass" id="btnToggleAa" aria-label="Chú thích">Aa✨</button>
+      </div>
+
+      <div class="recipient-strip" id="recipientStrip"></div>
+    </section>
+
+    <!-- FEED / LỊCH SỬ -->
+    <section class="feed-section kinetic-enter" id="screenFeed">
+      <div class="feed-toolbar">
+        <button type="button" class="friends-pill ios26-pill" id="btnFilterFeedFriend">Tất cả bạn bè ⌄</button>
+        <button type="button" class="preset-tag" id="btnToggleFeedLayout">⊞ Lưới</button>
+      </div>
+      <div id="feedCardsWrap" class="feed-snap-list"></div>
+      <button type="button" class="sheet-choice hidden-input" id="btnLoadMoreFeed">Tải thêm khoảnh khắc</button>
+    </section>
+
+    <!-- KỶ NIỆM ĐA THÁNG -->
+    <section class="memories-section kinetic-enter" id="screenMemories">
+      <div id="memoriesMonthsWrap"></div>
+      <div class="streak-summary-row">
+        <span>💛 <span id="locketTotalCount">0</span> Lockets</span>
+        <span>|</span>
+        <span>🔥 <span id="streakDayCount">0</span> ngày chuỗi</span>
+      </div>
+    </section>
+
+    <!-- TIN NHẮN -->
+    <section class="chat-section kinetic-enter" id="screenChat">
+      <input type="text" class="search-box" id="friendSearchInput" placeholder="Tìm bạn bè hoặc đoạn chat..." />
+      <div id="chatThreadsList" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </section>
+    <button type="button" class="fab-new-chat prismatic-btn" id="btnNewChatFab" aria-label="Tin nhắn mới">✏️</button>
+
+    <!-- THANH ĐIỀU HƯỚNG -->
+    <div class="LocketNav_pill__ei2q3 ios26-pill" id="mainNavBar">
+      <button type="button" class="LocketNav_btn__j9V0U" data-tab="memories" aria-label="Kỷ niệm">📅</button>
+      <button type="button" class="LocketNav_btn__j9V0U LocketNav_active__qa3bp" data-tab="camera" aria-label="Camera">🏠</button>
+      <button type="button" class="LocketNav_btn__j9V0U" data-tab="chat" aria-label="Tin nhắn">💬</button>
+    </div>
+  </div>
+
+  <!-- PHÒNG CHAT CHI TIẾT -->
+  <div class="thread-screen" id="threadScreen">
+    <div class="thread-shell">
+      <div class="thread-header">
+        <button type="button" class="top-btn ios26-glass" id="btnCloseThread" aria-label="Quay lại">←</button>
+        <div class="chat-avatar-box" id="threadPartnerAvatar" style="width:38px;height:38px;font-size:0.8rem;"></div>
+        <strong id="threadPartnerName">Bạn bè</strong>
+      </div>
+      <div class="thread-messages" id="threadMessagesBox"></div>
+      <input type="file" id="chatImageInput" accept="image/*" class="hidden-input" />
+      <div class="thread-composer">
+        <button type="button" class="thread-img-btn" id="btnPickChatImage" aria-label="Gửi ảnh">🖼️</button>
+        <div class="thread-input-wrap ios26-pill">
+          <input type="text" id="threadTextInput" placeholder="Gửi tin nhắn..." maxlength="500" />
+        </div>
+        <button type="button" class="thread-send-circle prismatic-btn" id="btnSendChatText" aria-label="Gửi">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHEET CHỌN KHUNG ẢNH CHỦ ĐỀ -->
+  <div class="Dialog_backdrop__NzZr" id="framePickerSheet">
+    <div class="Dialog_panel__YNtOY ios26-pill">
+      <strong>Khung ảnh chủ đề</strong>
+      <div class="preset-grid-pills" id="frameOptionsWrap"></div>
+      <button type="button" class="sheet-choice" id="btnCloseFramePicker">Đóng</button>
+    </div>
+  </div>
+
+  <!-- SHEET LỌC BẠN BÈ TRÊN FEED -->
+  <div class="Dialog_backdrop__NzZr" id="feedFilterSheet">
+    <div class="Dialog_panel__YNtOY ios26-pill">
+      <strong>Lọc khoảnh khắc theo bạn bè</strong>
+      <div id="feedFilterList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <button type="button" class="sheet-choice" id="btnCloseFeedFilter">Đóng</button>
+    </div>
+  </div>
+
+  <!-- SHEET GIAO DIỆN -->
+  <div class="Dialog_backdrop__NzZr" id="appearanceSheet">
+    <div class="Dialog_panel__YNtOY ios26-pill">
+      <strong>Giao diện &amp; Chủ đề</strong>
+      <div class="AppearanceSheet_segment__CQ0V">
+        <button type="button" class="AppearanceSheet_seg__Ae96d" data-surface="solid">Đặc</button>
+        <button type="button" class="AppearanceSheet_seg__Ae96d AppearanceSheet_on__7utU" data-surface="glass">Kính</button>
+      </div>
+      <div class="AppearanceSheet_themes__QuQt" id="themeOptionsGrid"></div>
+      <div class="AppearanceSheet_segment__CQ0V">
+        <button type="button" class="AppearanceSheet_seg__Ae96d" data-lite="off">Tắt</button>
+        <button type="button" class="AppearanceSheet_seg__Ae96d" data-lite="lite">Bật</button>
+        <button type="button" class="AppearanceSheet_seg__Ae96d AppearanceSheet_on__7utU" data-lite="auto">Tự động</button>
+      </div>
+      <button type="button" class="save-profile-btn prismatic-btn" id="btnDoneAppearance">Xong</button>
+    </div>
+  </div>
+
+  <!-- HỒ SƠ & CÀI ĐẶT -->
+  <div class="profile-drawer" id="profileDrawer">
+    <div class="profile-inner">
+      <div class="profile-head-row">
+        <button type="button" class="top-btn ios26-glass" id="btnCloseProfile">←</button>
+        <strong>Hồ sơ &amp; Cài đặt</strong>
+        <span style="width:42px"></span>
+      </div>
+      <div class="profile-hero">
+        <div class="profile-hero-avatar" id="heroAvatarBox">TL</div>
+        <div id="heroFullName" style="font-size:1.2rem;font-weight:800;">Đang tải...</div>
+        <div id="heroUsername" class="field-caption"></div>
+        <button type="button" id="btnEditAvatarMenu" style="background:none;border:none;color:var(--accent);font-weight:700;cursor:pointer;">Chỉnh ảnh</button>
+      </div>
+
+      <div class="settings-group ios26-pill">
+        <div class="settings-item">
+          <div>
+            <div style="font-weight:700;">Mời bạn bè tham gia Locket!</div>
+            <div id="inviteLinkText" class="field-caption"></div>
+          </div>
+          <button type="button" class="preset-tag" id="btnCopyInvite">Sao chép</button>
+        </div>
+      </div>
+
+      <div class="group-label">Giao diện</div>
+      <div class="settings-group ios26-pill">
+        <div class="settings-item">
+          <span>Chủ đề &amp; Khung Widget</span>
+          <button type="button" class="preset-tag" id="btnOpenAppearanceSheet">Tuỳ chỉnh</button>
+        </div>
+        <div class="settings-item">
+          <span>Hiệu ứng kính lỏng iOS 26</span>
+          <span class="ProfileSection_switch__U-UrR ProfileSection_on__LBazF" id="switchLiquidGlass"></span>
+        </div>
+      </div>
+
+      <div class="group-label">Thông tin tài khoản</div>
+      <div class="settings-group ios26-pill">
+        <div class="settings-item settings-item-col">
+          <span class="field-caption">Tên hiển thị</span>
+          <div class="name-pair-row">
+            <input type="text" class="auth-input" id="editFirstName" placeholder="Tên" />
+            <input type="text" class="auth-input" id="editLastName" placeholder="Họ" />
+          </div>
+        </div>
+        <div class="settings-item settings-item-col">
+          <span class="field-caption">Email (đã bảo vệ)</span>
+          <input type="text" class="auth-input" id="editEmailInput" placeholder="t***@gmail.com" />
+        </div>
+        <div class="settings-item settings-item-col">
+          <span class="field-caption">Ngày sinh (đã bảo vệ)</span>
+          <input type="text" class="auth-input" id="editBirthdayInput" placeholder="****-**-**" />
+        </div>
+        <button type="button" class="save-profile-btn prismatic-btn" id="btnSaveProfile">Lưu thay đổi</button>
+      </div>
+
+      <div class="group-label">Giới thiệu</div>
+      <div class="settings-group ios26-pill">
+        <a class="about-list-item" href="https://www.tiktok.com/@tlongmmo" target="_blank" rel="noopener"><span>🎵 TikTok</span><span>›</span></a>
+        <a class="about-list-item" href="https://www.facebook.com/htl165" target="_blank" rel="noopener"><span>Facebook</span><span>›</span></a>
+        <a class="about-list-item" href="https://www.messenger.com/t/htl165" target="_blank" rel="noopener"><span>Messenger</span><span>›</span></a>
+        <a class="about-list-item" href="https://www.instagram.com/tlongmmo" target="_blank" rel="noopener"><span>📷 Instagram</span><span>›</span></a>
+        <button type="button" class="about-list-item" id="btnProfileShare"><span>↗ Chia sẻ Locket</span><span>›</span></button>
+      </div>
+
+      <div class="settings-group ios26-pill">
+        <div class="settings-item danger-row" id="btnAccountAuthAction">
+          <span id="accountActionLabel">Đăng xuất</span><span>›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ĐĂNG NHẬP -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card-wrap">
+      <div class="locket-heart-logo">💛</div>
+      <h2 style="color:var(--accent);font-weight:900;">TLTH LOCKET</h2>
+      <p class="field-caption" style="margin-top:4px;">Đăng nhập để chia sẻ khoảnh khắc</p>
+      <div class="auth-form-box">
+        <input type="email" class="auth-input" id="authIdentifierInput" placeholder="Email của bạn" autocomplete="email" />
+        <div class="pass-wrap">
+          <input type="password" class="auth-input" id="authPassInput" placeholder="Mật khẩu" autocomplete="current-password" />
+          <button type="button" class="pass-eye-btn" id="btnTogglePassEye" aria-label="Hiện hoặc ẩn mật khẩu">👁️</button>
+        </div>
+        <button type="button" class="auth-login-btn prismatic-btn" id="btnSubmitAuth">Đăng nhập</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="avatarFilePicker" accept="image/*" class="hidden-input" />
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js").catch(() => {});
+    }
+
+    const DURATIONS = [3, 5, 15, 30, 60];
+    const THEMES_CATALOG = [
+      { id: "default", name: "Mặc định", bg: "#141518" },
+      { id: "gold", name: "Gold", bg: "linear-gradient(to left bottom, #000, #634800)" },
+      { id: "hotToGo", name: "Hot To Go", bg: "linear-gradient(to left bottom, #ff007a, #ff3f04)" },
+      { id: "sunrise", name: "Bình minh", bg: "linear-gradient(to right bottom, #ff763b, #fe526b)" },
+      { id: "jewelry", name: "Trang sức", bg: "linear-gradient(#fff1cd, #ffb800)" },
+      { id: "mist", name: "Sương mai", bg: "linear-gradient(#5ed8ff, #88ff6a)" },
+      { id: "sea", name: "Biển", bg: "linear-gradient(to right bottom, #12f3ff, #1269ff)" },
+      { id: "neptune", name: "Neptune", bg: "linear-gradient(120deg, #545bff, #aa3fff, #19f1ff)" },
+      { id: "goulash", name: "Tím mộng mơ", bg: "linear-gradient(to right bottom, #a44bff, #5700af)" },
+      { id: "orbit", name: "Quỹ đạo", bg: "linear-gradient(to right bottom, #2ce9f1, #ba76d0, #fa7dad)" },
+      { id: "bubbleGum", name: "Kẹo hồng", bg: "linear-gradient(#ff7ecc, #ff6ac4)" },
+      { id: "cloud", name: "Mây", bg: "linear-gradient(to right bottom, #fff, #8bd8ff)" },
+      { id: "crystal", name: "Pha lê", bg: "linear-gradient(#fff, #a4a4a4)" },
+      { id: "midnight", name: "Nửa đêm", bg: "#000" }
+    ];
+
+    const CAPTION_GROUPS = [
+      {
+        title: "Holiday / Sự kiện",
+        items: [
+          { label: "Xin chào Mùa Thu", icon: "🍂", colors: ["#D97706", "#92400E"] },
+          { label: "Xin chào 2027!", icon: "🥂", colors: ["#F59E0B", "#B45309"] },
+          { label: "2027", icon: "✨", colors: ["#1F2937", "#4B5563"] },
+          { label: "Happy Graduation Day!", icon: "🎓", colors: ["#2563EB", "#1D4ED8"] }
+        ]
+      },
+      {
+        title: "Decorative / Mood",
+        items: [
+          { label: "Good morning", icon: "☀️", colors: ["#F59E0B", "#FBBF24"] },
+          { label: "Goodnight", icon: "🌙", colors: ["#312E81", "#1E1B4B"] },
+          { label: "Locket Time!", icon: "📷", colors: ["#F7B500", "#FF8C00"] },
+          { label: "Cinema Time!", icon: "🎬", colors: ["#DC2626", "#991B1B"] },
+          { label: "Mixue Time!", icon: "🍦", colors: ["#EF4444", "#F87171"] },
+          { label: "Dating Time!", icon: "💕", colors: ["#EC4899", "#F43F5E"] },
+          { label: "Shopping Time!", icon: "🛍️", colors: ["#8B5CF6", "#EC4899"] },
+          { label: "Dinner Time!", icon: "🍽️", colors: ["#EA580C", "#C2410C"] },
+          { label: "Chilling Time!", icon: "🌴", colors: ["#10B981", "#059669"] },
+          { label: "Snake Vibes", icon: "🐍", colors: ["#16A34A", "#14532D"] }
+        ]
+      },
+      {
+        title: "Thời tiết & Nhiệt độ",
+        items: [
+          { label: "Tuyết rơi -2°C", icon: "❄️", colors: ["#38BDF8", "#0284C7"] },
+          { label: "Mưa rào lãng mạn 20°C", icon: "🌧️", colors: ["#475569", "#1E293B"] },
+          { label: "Nắng nhẹ chiều thu 24°C", icon: "🌤️", colors: ["#F59E0B", "#D97706"] },
+          { label: "Trời đầy sao 18°C", icon: "🌌", colors: ["#312E81", "#0F172A"] },
+          { label: "Sương mù giăng lối 15°C", icon: "🌫️", colors: ["#64748B", "#334155"] }
+        ]
+      },
+      {
+        title: "Góc Deadline & Đi làm",
+        items: [
+          { label: "Deadline dí tụt quần", icon: "🔥", colors: ["#DC2626", "#7F1D1D"] },
+          { label: "Cả ổ rắn độc", icon: "🐍", colors: ["#15803D", "#052E16"] }
+        ]
+      },
+      {
+        title: "AI / Vui nhộn",
+        items: [
+          { label: "AI Mood: Hôm nay quá chill", icon: "🤖", colors: ["#6366F1", "#A855F7"] },
+          { label: "AI Detect: 100% Đẹp trai/Xinh", icon: "✨", colors: ["#EC4899", "#8B5CF6"] }
+        ]
+      }
+    ];
+
+    const FRAME_OVERLAYS = [
+      { id: "none", name: "Không khung", draw: null },
+      {
+        id: "photobooth", name: "Photobooth",
+        draw: (ctx, s) => {
+          ctx.strokeStyle = "#ffffff"; ctx.lineWidth = s * 0.05;
+          ctx.strokeRect(s * 0.025, s * 0.025, s * 0.95, s * 0.95);
+          ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(0, s * 0.88, s, s * 0.12);
+          ctx.fillStyle = "#ffffff"; ctx.font = `700 ${Math.round(s * 0.04)}px sans-serif`;
+          ctx.textAlign = "center"; ctx.fillText("TLTH PHOTOBOOTH • 2026", s / 2, s * 0.955);
+        }
+      },
+      {
+        id: "y2k", name: "Khung Y2K",
+        draw: (ctx, s) => {
+          const g = ctx.createLinearGradient(0, 0, s, s);
+          g.addColorStop(0, "#ff007a"); g.addColorStop(1, "#12f3ff");
+          ctx.strokeStyle = g; ctx.lineWidth = s * 0.045;
+          ctx.strokeRect(s * 0.022, s * 0.022, s * 0.956, s * 0.956);
+          ctx.fillStyle = "#ffffff"; ctx.font = `800 ${Math.round(s * 0.045)}px sans-serif`;
+          ctx.textAlign = "right"; ctx.fillText("✦ Y2K ✦", s * 0.92, s * 0.1);
+        }
+      },
+      {
+        id: "couple", name: "Ghép đôi 💛",
+        draw: (ctx, s) => {
+          ctx.strokeStyle = "#f7b500"; ctx.lineWidth = s * 0.035;
+          ctx.strokeRect(s * 0.02, s * 0.02, s * 0.96, s * 0.96);
+          ctx.fillStyle = "#f7b500"; ctx.font = `700 ${Math.round(s * 0.05)}px sans-serif`;
+          ctx.textAlign = "left"; ctx.fillText("❤️‍🩹", s * 0.06, s * 0.1);
+        }
+      }
+    ];
+
+    const appState = {
+      authed: false,
+      myUid: "",
+      shareSlug: "",
+      mode: "photo",
+      stream: null,
+      facing: "user",
+      zoomLevel: 1,
+      durationIdx: 1,
+      videoMaxSeconds: 5,
+      activeFrameId: "none",
+      isRecording: false,
+      recordTimerId: null,
+      recordStartMs: 0,
+      mediaRecorder: null,
+      recordedChunks: [],
+      pickedImageFile: null,
+      pickedVideoFile: null,
+      activeBlobUrls: [],
+      selectedPreset: { id: "standard", label: "", icon: "", colors: [], text_color: "#FFFFFF" },
+      audience: "all",
+      selectedRecipients: new Set(),
+      friends: [],
+      conversations: [],
+      profile: {},
+      meta: { surface_style: "glass", theme_id: "default", lite_mode: "auto" },
+      chatPrefs: JSON.parse(localStorage.getItem("tl_chat_prefs") || "{}"),
+      activeChatPartner: null,
+      activeConvId: "",
+      chatPollTimer: null,
+      feedItems: [],
+      feedNextSync: null,
+      feedFilterUid: "",
+      feedGridMode: false,
+      noticeTimer: null
+    };
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getInitials(name) {
+      const parts = String(name || "L").trim().split(/\s+/);
+      return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "L";
+    }
+
+    function formatRelativeTime(ts) {
+      if (!ts) return "";
+      const d = typeof ts === "number" ? new Date(ts > 1e12 ? ts : ts * 1000) : new Date(ts);
+      if (isNaN(d.getTime())) return "";
+      const diffSec = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+      if (diffSec < 60) return "Vừa xong";
+      if (diffSec < 3600) return `${Math.floor(diffSec / 60)}p`;
+      if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}g`;
+      if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d`;
+      return `${d.getDate()} thg ${d.getMonth() + 1}`;
+    }
+
+    function showNotice(msg, kind = "info", durationMs = 2800) {
+      const pill = document.getElementById("globalNotice");
+      pill.textContent = msg;
+      pill.classList.remove("is-error", "is-success", "show");
+      if (kind === "error") pill.classList.add("is-error");
+      if (kind === "success") pill.classList.add("is-success");
+      requestAnimationFrame(() => pill.classList.add("show"));
+      clearTimeout(appState.noticeTimer);
+      appState.noticeTimer = setTimeout(() => pill.classList.remove("show"), durationMs);
+    }
+
+    function revokeOldBlobs() {
+      appState.activeBlobUrls.forEach((u) => URL.revokeObjectURL(u));
+      appState.activeBlobUrls = [];
+    }
+
+    function createTrackedBlobUrl(file) {
+      const u = URL.createObjectURL(file);
+      appState.activeBlobUrls.push(u);
+      return u;
+    }
+
+    // Crop 1:1 vuông + lật gương camera trước + ghép khung Frame Overlay
+    async function processSquareImageFile(fileOrVideo, isVideoEl = false) {
+      const size = 1080;
+      const cvs = document.createElement("canvas");
+      cvs.width = size;
+      cvs.height = size;
+      const ctx = cvs.getContext("2d");
+
+      let srcW, srcH, drawSource;
+      if (isVideoEl) {
+        srcW = fileOrVideo.videoWidth || 720;
+        srcH = fileOrVideo.videoHeight || 720;
+        drawSource = fileOrVideo;
+      } else {
+        const img = new Image();
+        const url = URL.createObjectURL(fileOrVideo);
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+        URL.revokeObjectURL(url);
+        srcW = img.naturalWidth || 720;
+        srcH = img.naturalHeight || 720;
+        drawSource = img;
+      }
+
+      const side = Math.min(srcW, srcH) / (isVideoEl ? Math.max(1, appState.zoomLevel) : 1);
+      const sx = (srcW - side) / 2;
+      const sy = (srcH - side) / 2;
+
+      ctx.save();
+      if (isVideoEl && appState.facing === "user") {
+        ctx.translate(size, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(drawSource, sx, sy, side, side, 0, 0, size, size);
+      ctx.restore();
+
+      const frameObj = FRAME_OVERLAYS.find((f) => f.id === appState.activeFrameId);
+      if (frameObj && frameObj.draw) {
+        frameObj.draw(ctx, size);
+      }
+
+      return new Promise((resolve) => {
+        cvs.toBlob((blob) => resolve(new File([blob], "moment_1x1.jpg", { type: "image/jpeg" })), "image/jpeg", 0.92);
+      });
+    }
+
+    function updateFramePreview() {
+      const img = document.getElementById("frameOverlayPreview");
+      const frameObj = FRAME_OVERLAYS.find((f) => f.id === appState.activeFrameId);
+      if (!frameObj || !frameObj.draw) {
+        img.style.display = "none";
+        return;
+      }
+      const c = document.createElement("canvas");
+      c.width = 512; c.height = 512;
+      frameObj.draw(c.getContext("2d"), 512);
+      img.src = c.toDataURL("image/png");
+      img.style.display = "block";
+    }
+
+    // Password Eye Toggle
+    document.getElementById("btnTogglePassEye").addEventListener("click", () => {
+      const inp = document.getElementById("authPassInput");
+      const btn = document.getElementById("btnTogglePassEye");
+      const show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      btn.textContent = show ? "🙈" : "👁️";
+    });
+
+    // Duration Selector (3s, 5s, 15s, 30s, 60s)
+    document.getElementById("btnDurationCycle").addEventListener("click", () => {
+      appState.durationIdx = (appState.durationIdx + 1) % DURATIONS.length;
+      appState.videoMaxSeconds = DURATIONS[appState.durationIdx];
+      document.getElementById("btnDurationCycle").textContent = `${appState.videoMaxSeconds}s`;
+    });
+
+    // Zoom Selector (0.5x, 1x, 2x)
+    document.querySelectorAll(".zoom-opt").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const z = parseFloat(btn.dataset.zoom);
+        appState.zoomLevel = z;
+        document.querySelectorAll(".zoom-opt").forEach((b) => b.classList.toggle("active", b === btn));
+        const track = appState.stream?.getVideoTracks?.()[0];
+        let appliedHw = false;
+        if (track && track.getCapabilities) {
+          const caps = track.getCapabilities();
+          if (caps.zoom) {
+            const clamped = Math.min(caps.zoom.max, Math.max(caps.zoom.min, z));
+            try { await track.applyConstraints({ advanced: [{ zoom: clamped }] }); appliedHw = true; } catch (e) {}
+          }
+        }
+        const vid = document.getElementById("camStreamEl");
+        const mirror = appState.facing === "user" ? -1 : 1;
+        vid.style.transform = appliedHw ? `scaleX(${mirror})` : `scaleX(${mirror}) scale(${Math.max(1, z)})`;
+      });
+    });
+
+    // Frame Picker
+    document.getElementById("btnOpenFrames").addEventListener("click", () => {
+      const wrap = document.getElementById("frameOptionsWrap");
+      wrap.innerHTML = "";
+      FRAME_OVERLAYS.forEach((fr) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "preset-tag";
+        b.textContent = fr.name;
+        if (appState.activeFrameId === fr.id) b.style.borderColor = "var(--accent)";
+        b.addEventListener("click", () => {
+          appState.activeFrameId = fr.id;
+          updateFramePreview();
+          document.getElementById("framePickerSheet").classList.remove("open");
+        });
+        wrap.appendChild(b);
+      });
+      document.getElementById("framePickerSheet").classList.add("open");
+    });
+    document.getElementById("btnCloseFramePicker").addEventListener("click", () => {
+      document.getElementById("framePickerSheet").classList.remove("open");
+    });
+
+    // Camera Controls
+    const camStreamEl = document.getElementById("camStreamEl");
+    const camBox = document.getElementById("camBox");
+    const btnCaptureAction = document.getElementById("btnCaptureAction");
+
+    function stopStream() {
+      if (appState.stream) {
+        appState.stream.getTracks().forEach((t) => t.stop());
+        appState.stream = null;
+      }
+      camStreamEl.style.display = "none";
+    }
+
+    async function openCameraStream() {
+      stopStream();
+      document.getElementById("camHint").style.display = "none";
+      try {
+        appState.stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: appState.facing, aspectRatio: 1 },
+          audio: appState.mode === "video"
+        });
+        camStreamEl.srcObject = appState.stream;
+        camStreamEl.classList.toggle("is-mirrored", appState.facing === "user");
+        camStreamEl.style.display = "block";
+      } catch (e) {
+        const h = document.getElementById("camHint");
+        h.textContent = "Không mở được camera, hãy chọn từ thư viện";
+        h.style.display = "flex";
+      }
+    }
+
+    document.getElementById("btnFlashToggle").addEventListener("click", () => appState.stream ? stopStream() : openCameraStream());
+    document.getElementById("btnSwitchCam").addEventListener("click", () => {
+      appState.facing = appState.facing === "user" ? "environment" : "user";
+      openCameraStream();
+    });
+    document.getElementById("modePhotoBtn").addEventListener("click", () => {
+      appState.mode = "photo";
+      document.getElementById("modePhotoBtn").classList.add("active");
+      document.getElementById("modeVideoBtn").classList.remove("active");
+    });
+    document.getElementById("modeVideoBtn").addEventListener("click", () => {
+      appState.mode = "video";
+      document.getElementById("modeVideoBtn").classList.add("active");
+      document.getElementById("modePhotoBtn").classList.remove("active");
+    });
+
+    function openComposeScreen(imageFile, videoFile) {
+      revokeOldBlobs();
+      appState.pickedImageFile = imageFile || null;
+      appState.pickedVideoFile = videoFile || null;
+      stopStream();
+
+      const imgEl = document.getElementById("finalPhotoEl");
+      const vidEl = document.getElementById("finalVideoEl");
+      imgEl.style.display = "none";
+      vidEl.style.display = "none";
+
+      if (videoFile) {
+        vidEl.src = createTrackedBlobUrl(videoFile);
+        vidEl.style.display = "block";
+      } else if (imageFile) {
+        const u = createTrackedBlobUrl(imageFile);
+        imgEl.src = u;
+        imgEl.style.display = "block";
+        document.getElementById("galleryThumbPreview").src = u;
+        document.getElementById("galleryThumbPreview").style.display = "block";
+        document.getElementById("galleryFallbackIcon").style.display = "none";
+      }
+
+      document.getElementById("screenCamera").classList.remove("active");
+      document.getElementById("screenCompose").classList.add("active");
+      document.getElementById("mainTopbar").style.display = "none";
+      document.getElementById("mainNavBar").style.display = "none";
+      renderRecipients();
+    }
+
+    function finishVideoRecording() {
+      appState.isRecording = false;
+      clearInterval(appState.recordTimerId);
+      camBox.classList.remove("is-recording");
+      btnCaptureAction.classList.remove("is-recording");
+      document.documentElement.style.setProperty("--rec-progress", "0deg");
+      if (appState.mediaRecorder && appState.mediaRecorder.state !== "inactive") {
+        appState.mediaRecorder.stop();
+      }
+    }
+
+    function startVideoRecording() {
+      appState.recordedChunks = [];
+      try {
+        const mr = new MediaRecorder(appState.stream);
+        mr.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) appState.recordedChunks.push(ev.data); };
+        mr.onstop = () => {
+          const blob = new Blob(appState.recordedChunks, { type: "video/webm" });
+          openComposeScreen(null, new File([blob], "clip.webm", { type: "video/webm" }));
+        };
+        mr.start();
+        appState.mediaRecorder = mr;
+        appState.isRecording = true;
+        appState.recordStartMs = performance.now();
+        camBox.classList.add("is-recording");
+        btnCaptureAction.classList.add("is-recording");
+
+        appState.recordTimerId = setInterval(() => {
+          const elapsed = (performance.now() - appState.recordStartMs) / 1000;
+          const pct = Math.min(1, elapsed / appState.videoMaxSeconds);
+          document.documentElement.style.setProperty("--rec-progress", `${(pct * 360).toFixed(1)}deg`);
+          if (elapsed >= appState.videoMaxSeconds) finishVideoRecording();
+        }, 32);
+      } catch (e) {
+        showNotice("Trình duyệt không hỗ trợ quay trực tiếp", "error");
+      }
+    }
+
+    btnCaptureAction.addEventListener("click", async () => {
+      if (!appState.stream) { await openCameraStream(); return; }
+      if (appState.mode === "photo") {
+        if (appState.activeFrameId !== "none") showNotice("Đang rửa ảnh...", "info", 1200);
+        const sqFile = await processSquareImageFile(camStreamEl, true);
+        openComposeScreen(sqFile, null);
+      } else {
+        if (!appState.isRecording) startVideoRecording();
+        else finishVideoRecording();
+      }
+    });
+
+    const galleryInput = document.getElementById("mediaGalleryInput");
+    document.getElementById("btnGalleryPick").addEventListener("click", () => galleryInput.click());
+    galleryInput.addEventListener("change", async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      if (f.type.startsWith("video/")) openComposeScreen(null, f);
+      else {
+        const sq = await processSquareImageFile(f, false);
+        openComposeScreen(sq, null);
+      }
+      galleryInput.value = "";
+    });
+
+    document.getElementById("btnCancelCompose").addEventListener("click", () => {
+      setActiveTab("camera");
+      openCameraStream();
+    });
+
+    // Captions phân nhóm
+    document.getElementById("btnToggleAa").addEventListener("click", () => {
+      document.getElementById("captionDrawer").classList.toggle("open");
+    });
+
+    function renderCaptionGroups() {
+      const wrap = document.getElementById("presetTagsWrap");
+      wrap.innerHTML = "";
+      CAPTION_GROUPS.forEach((grp) => {
+        const h = document.createElement("div");
+        h.className = "caption-cat-title";
+        h.textContent = grp.title;
+        wrap.appendChild(h);
+        const grid = document.createElement("div");
+        grid.className = "preset-grid-pills";
+        grp.items.forEach((pr) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "preset-tag";
+          btn.textContent = `${pr.icon} ${pr.label}`;
+          if (pr.colors?.length >= 2) btn.style.backgroundImage = `linear-gradient(135deg, ${pr.colors[0]}, ${pr.colors[1]})`;
+          btn.addEventListener("click", () => {
+            appState.selectedPreset = { id: "standard", label: pr.label, icon: pr.icon, colors: pr.colors || [], text_color: "#FFFFFF" };
+            const inp = document.getElementById("composeCaptionInput");
+            inp.value = `${pr.icon} ${pr.label}`;
+            if (pr.colors?.length >= 2) inp.style.backgroundImage = `linear-gradient(135deg, ${pr.colors[0]}, ${pr.colors[1]})`;
+          });
+          grid.appendChild(btn);
+        });
+        wrap.appendChild(grid);
+      });
+    }
+
+    // Render Recipients (chống XSS)
+    function renderRecipients() {
+      const strip = document.getElementById("recipientStrip");
+      strip.innerHTML = "";
+      const allChip = document.createElement("div");
+      allChip.className = "rec-chip" + (appState.audience === "all" ? " active" : "");
+      allChip.innerHTML = `<div class="rec-avatar">👥</div><span>Tất cả</span>`;
+      allChip.addEventListener("click", () => { appState.audience = "all"; appState.selectedRecipients.clear(); renderRecipients(); });
+      strip.appendChild(allChip);
+
+      appState.friends.forEach((fr) => {
+        const active = appState.audience === "selected" && appState.selectedRecipients.has(fr.uid);
+        const chip = document.createElement("div");
+        chip.className = "rec-chip" + (active ? " active" : "");
+        const av = document.createElement("div");
+        av.className = "rec-avatar";
+        if (fr.avatar) {
+          const im = document.createElement("img"); im.src = fr.avatar; im.alt = ""; av.appendChild(im);
+        } else {
+          av.textContent = getInitials(fr.name);
+        }
+        const sp = document.createElement("span");
+        sp.textContent = fr.name.split(" ")[0];
+        chip.append(av, sp);
+        chip.addEventListener("click", () => {
+          appState.audience = "selected";
+          if (appState.selectedRecipients.has(fr.uid)) appState.selectedRecipients.delete(fr.uid);
+          else appState.selectedRecipients.add(fr.uid);
+          if (appState.selectedRecipients.size === 0) appState.audience = "all";
+          renderRecipients();
+        });
+        strip.appendChild(chip);
+      });
+    }
+
+    document.getElementById("btnSubmitMoment").addEventListener("click", async () => {
+      const btn = document.getElementById("btnSubmitMoment");
+      btn.disabled = true;
+      showNotice("Đang gửi moment lên Locket...");
+      const fd = new FormData();
+      if (appState.pickedImageFile) fd.append("image", appState.pickedImageFile);
+      if (appState.pickedVideoFile) fd.append("video", appState.pickedVideoFile);
+      fd.append("caption", document.getElementById("composeCaptionInput").value.trim());
+      fd.append("preset_id", appState.selectedPreset.id || "standard");
+      if (appState.selectedPreset.colors?.length) fd.append("colors", appState.selectedPreset.colors.join(","));
+      fd.append("audience", appState.audience);
+      if (appState.audience === "selected") fd.append("recipients", Array.from(appState.selectedRecipients).join(","));
+
+      try {
+        const res = await fetch("/api/post", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          showNotice("Đã gửi moment thành công!", "success");
+          document.getElementById("composeCaptionInput").value = "";
+          setActiveTab("feed");
+        } else {
+          showNotice(data.error || "Gửi thất bại", "error");
+        }
+      } catch (e) {
+        showNotice("Lỗi kết nối", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Feed + Grid 3 cột + Lọc bạn bè + Save Moment
+    function findFriend(uidAlias) {
+      if (uidAlias === appState.myUid) return { name: "Bạn", avatar: appState.profile.avatar || "" };
+      return appState.friends.find((f) => f.uid === uidAlias) || { name: "Bạn bè", avatar: "" };
+    }
+
+    async function loadFeed(append = false) {
+      const wrap = document.getElementById("feedCardsWrap");
+      if (!append) {
+        appState.feedItems = [];
+        appState.feedNextSync = null;
+        wrap.innerHTML = `<div class="ios26-pill" style="padding:20px;text-align:center;">Đang tải khoảnh khắc...</div>`;
+      }
+      const params = new URLSearchParams();
+      if (append && appState.feedNextSync) params.set("sync_token", appState.feedNextSync);
+      if (appState.feedFilterUid) params.set("friend_uid", appState.feedFilterUid);
+
+      const res = await fetch(`/api/feed?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        wrap.textContent = "Không tải được khoảnh khắc";
+        return;
+      }
+      appState.feedNextSync = data.next_sync || null;
+      appState.feedItems = append ? appState.feedItems.concat(data.items || []) : (data.items || []);
+      document.getElementById("btnLoadMoreFeed").classList.toggle("hidden-input", !appState.feedNextSync || !(data.items || []).length);
+      renderFeedUI();
+    }
+
+    function renderFeedUI() {
+      const wrap = document.getElementById("feedCardsWrap");
+      wrap.innerHTML = "";
+      wrap.className = appState.feedGridMode ? "feed-grid-3" : "feed-snap-list";
+      if (!appState.feedItems.length) {
+        wrap.innerHTML = `<div class="ios26-pill" style="padding:20px;text-align:center;grid-column:1/-1;">Chưa có khoảnh khắc nào</div>`;
+        return;
+      }
+
+      if (appState.feedGridMode) {
+        appState.feedItems.forEach((m, idx) => {
+          const tile = document.createElement("div");
+          tile.className = "feed-grid-item";
+          if (m.thumbnail_url) {
+            const im = document.createElement("img");
+            im.src = m.thumbnail_url; im.loading = "lazy"; im.alt = "";
+            tile.appendChild(im);
+          }
+          tile.addEventListener("click", () => {
+            appState.feedGridMode = false;
+            document.getElementById("btnToggleFeedLayout").textContent = "⊞ Lưới";
+            renderFeedUI();
+            const cards = wrap.querySelectorAll(".moment-card");
+            if (cards[idx]) cards[idx].scrollIntoView({ behavior: "smooth" });
+          });
+          wrap.appendChild(tile);
+        });
+        return;
+      }
+
+      appState.feedItems.forEach((m) => {
+        const author = findFriend(m.user);
+        const card = document.createElement("div");
+        card.className = "moment-card kinetic-enter";
+
+        const box = document.createElement("div");
+        box.className = "cam-box";
+        const inner = document.createElement("div");
+        inner.className = "frame-inner";
+        if (m.video_url) {
+          const v = document.createElement("video");
+          v.src = m.video_url; v.poster = m.thumbnail_url || ""; v.autoplay = true; v.muted = true; v.loop = true; v.playsInline = true;
+          inner.appendChild(v);
+        } else if (m.thumbnail_url) {
+          const im = document.createElement("img");
+          im.src = m.thumbnail_url; im.loading = "lazy"; im.alt = "";
+          inner.appendChild(im);
+        }
+        if (m.caption) {
+          const cap = document.createElement("div");
+          cap.className = "caption-pill-input";
+          cap.style.pointerEvents = "none";
+          cap.textContent = m.caption;
+          inner.appendChild(cap);
+        }
+        box.appendChild(inner);
+
+        const byline = document.createElement("div");
+        byline.className = "moment-byline";
+        const left = document.createElement("div");
+        left.className = "moment-author-left";
+        const av = document.createElement("span");
+        av.className = "mini-avatar";
+        if (author.avatar) { const im = document.createElement("img"); im.src = author.avatar; im.alt = ""; av.appendChild(im); }
+        else av.textContent = getInitials(author.name);
+        const nameTxt = document.createElement("span");
+        nameTxt.textContent = `${author.name} · ${formatRelativeTime(m.timestamp)}`;
+        left.append(av, nameTxt);
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "save-moment-btn";
+        saveBtn.textContent = "⬇ Lưu";
+        saveBtn.addEventListener("click", () => {
+          const a = document.createElement("a");
+          a.href = m.video_url || m.thumbnail_url;
+          a.download = m.video_url ? `locket_${m.id}.mp4` : `locket_${m.id}.webp`;
+          a.click();
+        });
+        byline.append(left, saveBtn);
+
+        const bar = document.createElement("div");
+        bar.className = "reply-bar ios26-pill";
+        const inp = document.createElement("input");
+        inp.type = "text"; inp.placeholder = "Gửi tin nhắn..."; inp.maxLength = 300;
+        inp.addEventListener("keydown", async (ev) => {
+          if (ev.key === "Enter" && inp.value.trim()) {
+            const txt = inp.value.trim(); inp.value = "";
+            await fetch("/api/comment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ moment_uid: m.id, receiver_uid: m.user, text: txt }) });
+            showNotice("Đã gửi tin nhắn", "success");
+          }
+        });
+        bar.appendChild(inp);
+        ["😍", "💛", "🔥"].forEach((emo) => {
+          const eb = document.createElement("button");
+          eb.type = "button"; eb.className = "quick-emo"; eb.textContent = emo;
+          eb.addEventListener("click", async () => {
+            await fetch("/api/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ moment_uid: m.id, reaction: emo }) });
+            showNotice(`Đã thả ${emo}`, "success");
+          });
+          bar.appendChild(eb);
+        });
+
+        card.append(box, byline, bar);
+        wrap.appendChild(card);
+      });
+    }
+
+    document.getElementById("btnLoadMoreFeed").addEventListener("click", () => loadFeed(true));
+    document.getElementById("btnToggleFeedLayout").addEventListener("click", () => {
+      appState.feedGridMode = !appState.feedGridMode;
+      document.getElementById("btnToggleFeedLayout").textContent = appState.feedGridMode ? "☰ Danh sách" : "⊞ Lưới";
+      renderFeedUI();
+    });
+    document.getElementById("btnFilterFeedFriend").addEventListener("click", () => {
+      const list = document.getElementById("feedFilterList");
+      list.innerHTML = "";
+      const addOpt = (uid, label) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "sheet-choice"; b.textContent = label;
+        b.addEventListener("click", () => {
+          appState.feedFilterUid = uid;
+          document.getElementById("btnFilterFeedFriend").textContent = `${label} ⌄`;
+          document.getElementById("feedFilterSheet").classList.remove("open");
+          loadFeed(false);
+        });
+        list.appendChild(b);
+      };
+      addOpt("", "Tất cả bạn bè");
+      appState.friends.forEach((f) => addOpt(f.uid, f.name));
+      document.getElementById("feedFilterSheet").classList.add("open");
+    });
+    document.getElementById("btnCloseFeedFilter").addEventListener("click", () => document.getElementById("feedFilterSheet").classList.remove("open"));
+
+    // Lịch Kỷ niệm đa tháng
+    async function loadMemoriesCalendar() {
+      const wrap = document.getElementById("memoriesMonthsWrap");
+      wrap.innerHTML = "";
+      let items = [];
+      try {
+        const res = await fetch("/api/memories");
+        const data = await res.json();
+        if (res.ok && data.ok) items = data.items || [];
+      } catch (e) {}
+
+      const byDate = {};
+      items.forEach((it) => {
+        const d = new Date(it.created_at);
+        if (!isNaN(d.getTime())) {
+          const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+          if (!byDate[key]) byDate[key] = it;
+        }
+      });
+
+      document.getElementById("locketTotalCount").textContent = items.length;
+      document.getElementById("streakDayCount").textContent = Object.keys(byDate).length;
+
+      const now = new Date();
+      for (let mOffset = 0; mOffset < 3; mOffset++) {
+        const dt = new Date(now.getFullYear(), now.getMonth() - mOffset, 1);
+        const year = dt.getFullYear();
+        const month = dt.getMonth() + 1;
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        const card = document.createElement("div");
+        card.className = "calendar-month-card ios26-pill";
+        const title = document.createElement("div");
+        title.className = "calendar-month-title";
+        title.textContent = `Tháng ${month} ${year}`;
+        const grid = document.createElement("div");
+        grid.className = "calendar-grid-7";
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const slot = document.createElement("div");
+          slot.className = "cal-slot";
+          const entry = byDate[`${year}-${month}-${day}`];
+          if (entry && entry.thumbnail_url) {
+            slot.classList.add("has-media");
+            const im = document.createElement("img");
+            im.src = entry.thumbnail_url; im.loading = "lazy"; im.alt = "";
+            slot.appendChild(im);
+            slot.addEventListener("click", () => setActiveTab("feed"));
+          } else {
+            slot.textContent = String(day);
+          }
+          grid.appendChild(slot);
+        }
+        card.append(title, grid);
+        wrap.appendChild(card);
+      }
+    }
+
+    // Tin nhắn: Lọc chỉ hiện đoạn chat đã có tin nhắn (trừ khi tìm kiếm / tạo mới) + Sắp xếp + Polling
+    function renderFriendsAndChats(filterText = "", showAllFriends = false) {
+      const q = filterText.trim().toLowerCase();
+      const list = document.getElementById("chatThreadsList");
+      list.innerHTML = "";
+
+      const convMap = {};
+      appState.conversations.forEach((c) => { if (c.peer_uid) convMap[c.peer_uid] = c; });
+
+      let rows = appState.friends.map((fr) => {
+        const conv = convMap[fr.uid];
+        const lm = conv?.latest_message || {};
+        return {
+          friend: fr,
+          hasMsg: Boolean(lm.text || lm.timestamp),
+          lastText: lm.text || "Bắt đầu cuộc hội thoại!",
+          lastTs: lm.timestamp ? new Date(lm.timestamp).getTime() : 0,
+          pinned: Boolean(appState.chatPrefs[fr.uid]?.pinned)
+        };
+      });
+
+      if (!q && !showAllFriends) {
+        const withMsgs = rows.filter((r) => r.hasMsg);
+        if (withMsgs.length) rows = withMsgs;
+      } else if (q) {
+        rows = rows.filter((r) => r.friend.name.toLowerCase().includes(q) || r.lastText.toLowerCase().includes(q));
+      }
+
+      rows.sort((a, b) => (Number(b.pinned) - Number(a.pinned)) || (b.lastTs - a.lastTs));
+
+      rows.forEach((r) => {
+        const row = document.createElement("div");
+        row.className = "chat-row ios26-pill";
+        const av = document.createElement("div");
+        av.className = "chat-avatar-box";
+        if (r.friend.avatar) {
+          const im = document.createElement("img"); im.src = r.friend.avatar; im.alt = ""; av.appendChild(im);
+        } else {
+          av.textContent = getInitials(r.friend.name);
+        }
+        const meta = document.createElement("div");
+        meta.className = "chat-row-meta";
+        const top = document.createElement("div");
+        top.className = "chat-row-top";
+        const nameEl = document.createElement("div");
+        nameEl.className = "chat-row-name";
+        nameEl.textContent = r.friend.name + (r.pinned ? " 📌" : "");
+        const timeEl = document.createElement("span");
+        timeEl.className = "chat-row-time";
+        timeEl.textContent = r.lastTs ? formatRelativeTime(r.lastTs) : "";
+        top.append(nameEl, timeEl);
+
+        const sub = document.createElement("div");
+        sub.className = "chat-row-sub";
+        sub.textContent = r.lastText;
+        meta.append(top, sub);
+        row.append(av, meta);
+        row.addEventListener("click", () => openChatThread(r.friend));
+        list.appendChild(row);
+      });
+    }
+
+    document.getElementById("friendSearchInput").addEventListener("input", (e) => renderFriendsAndChats(e.target.value));
+    document.getElementById("btnNewChatFab").addEventListener("click", () => {
+      renderFriendsAndChats("", true);
+      document.getElementById("friendSearchInput").focus();
+    });
+
+    function stopChatPolling() {
+      clearInterval(appState.chatPollTimer);
+      appState.chatPollTimer = null;
+    }
+
+    function startChatPolling() {
+      stopChatPolling();
+      appState.chatPollTimer = setInterval(() => {
+        if (appState.activeChatPartner && document.visibilityState === "visible") {
+          refreshChatMessages(true);
+        }
+      }, 4000);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") stopChatPolling();
+      else if (appState.activeChatPartner) startChatPolling();
+    });
+
+    document.getElementById("btnCloseThread").addEventListener("click", () => {
+      stopChatPolling();
+      document.getElementById("threadScreen").classList.remove("open");
+      document.getElementById("threadMessagesBox").innerHTML = "";
+      appState.activeChatPartner = null;
+    });
+
+    async function openChatThread(friend) {
+      appState.activeChatPartner = friend;
+      document.getElementById("threadPartnerName").textContent = friend.name;
+      const avBox = document.getElementById("threadPartnerAvatar");
+      avBox.innerHTML = "";
+      if (friend.avatar) {
+        const im = document.createElement("img"); im.src = friend.avatar; im.alt = ""; avBox.appendChild(im);
+      } else {
+        avBox.textContent = getInitials(friend.name);
+      }
+      document.getElementById("threadScreen").classList.add("open");
+      await refreshChatMessages(false);
+      startChatPolling();
+    }
+
+    async function refreshChatMessages(silent = false) {
+      if (!appState.activeChatPartner) return;
+      const box = document.getElementById("threadMessagesBox");
+      if (!silent) box.innerHTML = `<div class="thread-empty">Đang tải tin nhắn...</div>`;
+      const res = await fetch(`/api/chat/messages?other_user_id=${encodeURIComponent(appState.activeChatPartner.uid)}`);
+      const data = await res.json();
+      if (!res.ok || !data.ok) return;
+      appState.activeConvId = data.conversation_id || "";
+      const msgs = Array.isArray(data.messages) ? data.messages : [];
+      box.innerHTML = "";
+      if (!msgs.length) {
+        const empty = document.createElement("div");
+        empty.className = "thread-empty";
+        empty.textContent = `Bắt đầu trò chuyện với ${appState.activeChatPartner.name}`;
+        box.appendChild(empty);
+        return;
+      }
+      msgs.forEach((m) => {
+        const row = document.createElement("div");
+        row.className = `Chat_msg-row__kdAx7 ${m.is_me ? "Chat_mine__qOfuk" : ""}`;
+        const wrap = document.createElement("div");
+        wrap.className = "Chat_msg__AU6sH";
+        const bubble = document.createElement("div");
+        bubble.className = "Chat_bubble__jpT2a";
+        if (m.image_url) {
+          const im = document.createElement("img"); im.src = m.image_url; im.alt = ""; bubble.appendChild(im);
+        } else {
+          bubble.textContent = m.text || "";
+        }
+        wrap.appendChild(bubble);
+        if (m.reaction) {
+          const rx = document.createElement("div");
+          rx.style.fontSize = "0.82rem"; rx.style.alignSelf = "flex-end"; rx.textContent = m.reaction;
+          wrap.appendChild(rx);
+        }
+        row.appendChild(wrap);
+        box.appendChild(row);
+      });
+      if (!silent) box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendChatText() {
+      if (!appState.activeChatPartner) return;
+      const inp = document.getElementById("threadTextInput");
+      const text = inp.value.trim(); if (!text) return;
+      inp.value = "";
+      const fd = new FormData();
+      fd.append("receiver_uid", appState.activeChatPartner.uid);
+      fd.append("text", text);
+      const res = await fetch("/api/chat/send", { method: "POST", body: fd });
+      if (res.ok) await refreshChatMessages(false);
+    }
+    document.getElementById("threadTextInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendChatText(); });
+    document.getElementById("btnSendChatText").addEventListener("click", sendChatText);
+
+    const chatImageInput = document.getElementById("chatImageInput");
+    document.getElementById("btnPickChatImage").addEventListener("click", () => chatImageInput.click());
+    chatImageInput.addEventListener("change", async (e) => {
+      const f = e.target.files[0]; if (!f || !appState.activeChatPartner) return;
+      const fd = new FormData();
+      fd.append("receiver_uid", appState.activeChatPartner.uid);
+      fd.append("image", f);
+      const res = await fetch("/api/chat/send", { method: "POST", body: fd });
+      chatImageInput.value = "";
+      if (res.ok) await refreshChatMessages(false);
+    });
+
+    // Navigation & Appearance
+    function setActiveTab(tab) {
+      document.getElementById("screenCamera").classList.toggle("active", tab === "camera");
+      document.getElementById("screenCompose").classList.remove("active");
+      document.getElementById("screenFeed").classList.toggle("active", tab === "feed");
+      document.getElementById("screenMemories").classList.toggle("active", tab === "memories");
+      document.getElementById("screenChat").classList.toggle("active", tab === "chat");
+      document.getElementById("btnNewChatFab").classList.toggle("show", tab === "chat");
+      document.getElementById("mainTopbar").style.display = "flex";
+      document.getElementById("mainNavBar").style.display = "flex";
+      document.querySelectorAll(".LocketNav_btn__j9V0U").forEach((b) => {
+        b.classList.toggle("LocketNav_active__qa3bp", b.dataset.tab === (tab === "feed" ? "camera" : tab));
+      });
+      if (tab === "feed") loadFeed(false);
+      if (tab === "memories") loadMemoriesCalendar();
+      if (tab === "chat") renderFriendsAndChats();
+    }
+
+    document.querySelectorAll(".LocketNav_btn__j9V0U").forEach((b) => b.addEventListener("click", () => setActiveTab(b.dataset.tab)));
+    document.getElementById("btnHistoryJump").addEventListener("click", () => setActiveTab("feed"));
+    document.getElementById("btnTopRollcall").addEventListener("click", () => setActiveTab("feed"));
+    document.getElementById("btnFriendsPill").addEventListener("click", () => setActiveTab("chat"));
+
+    function applyAppearanceMeta() {
+      const surface = appState.meta.surface_style || "glass";
+      const theme = appState.meta.theme_id || "default";
+      const lite = appState.meta.lite_mode === "lite";
+      document.body.dataset.surface = surface;
+      document.body.dataset.theme = theme;
+      document.body.dataset.lite = lite ? "true" : "false";
+      document.getElementById("switchLiquidGlass").classList.toggle("ProfileSection_on__LBazF", surface === "glass" && !lite);
+      const grid = document.getElementById("themeOptionsGrid");
+      grid.innerHTML = "";
+      THEMES_CATALOG.forEach((th) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "AppearanceSheet_theme__cEQAb" + (theme === th.id ? " AppearanceSheet_on__7utU" : "");
+        btn.innerHTML = `<span class="AppearanceSheet_phone__V7b9z" style="background:${th.bg}"><span class="AppearanceSheet_finder__mdQPx"></span><span class="AppearanceSheet_shutter__QGKJd"></span></span><span class="AppearanceSheet_name__VRsO7">${th.name}</span>`;
+        btn.addEventListener("click", () => { appState.meta.theme_id = th.id; applyAppearanceMeta(); });
+        grid.appendChild(btn);
+      });
+    }
+
+    document.getElementById("btnOpenProfile").addEventListener("click", () => document.getElementById("profileDrawer").classList.add("open"));
+    document.getElementById("btnCloseProfile").addEventListener("click", () => document.getElementById("profileDrawer").classList.remove("open"));
+    document.getElementById("btnOpenAppearanceSheet").addEventListener("click", () => document.getElementById("appearanceSheet").classList.add("open"));
+    document.getElementById("btnDoneAppearance").addEventListener("click", () => document.getElementById("appearanceSheet").classList.remove("open"));
+    document.querySelectorAll("[data-surface]").forEach((b) => b.addEventListener("click", () => { appState.meta.surface_style = b.dataset.surface; applyAppearanceMeta(); }));
+    document.querySelectorAll("[data-lite]").forEach((b) => b.addEventListener("click", () => { appState.meta.lite_mode = b.dataset.lite; applyAppearanceMeta(); }));
+    document.getElementById("switchLiquidGlass").addEventListener("click", () => { appState.meta.surface_style = appState.meta.surface_style === "solid" ? "glass" : "solid"; applyAppearanceMeta(); });
+
+    // Link mời Locket gốc: https://locket.cam/<username>
+    function buildShareUrl() {
+      const uname = appState.shareSlug || appState.profile.username || "";
+      return uname ? `https://locket.cam/${encodeURIComponent(uname)}` : "https://locket.cam/";
+    }
+    const copyShare = () => { navigator.clipboard?.writeText(buildShareUrl()); showNotice("Đã sao chép link Locket!", "success"); };
+    document.getElementById("btnCopyInvite").addEventListener("click", copyShare);
+    document.getElementById("btnProfileShare").addEventListener("click", copyShare);
+
+    document.getElementById("btnSaveProfile").addEventListener("click", async () => {
+      const res = await fetch("/api/profile/update", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: document.getElementById("editFirstName").value.trim(),
+          last_name: document.getElementById("editLastName").value.trim(),
+          email: document.getElementById("editEmailInput").value.trim(),
+          birthday: document.getElementById("editBirthdayInput").value.trim(),
+          surface_style: appState.meta.surface_style,
+          theme_id: appState.meta.theme_id,
+          lite_mode: appState.meta.lite_mode
+        })
+      });
+      if (res.ok) showNotice("Đã lưu thay đổi", "success");
+    });
+
+    document.getElementById("btnEditAvatarMenu").addEventListener("click", () => document.getElementById("avatarFilePicker").click());
+    document.getElementById("avatarFilePicker").addEventListener("change", async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      const fd = new FormData(); fd.append("avatar", f);
+      const res = await fetch("/api/profile/avatar", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.ok && data.avatar_url) {
+        document.getElementById("heroAvatarBox").innerHTML = `<img src="${data.avatar_url}" alt="" />`;
+        document.getElementById("btnOpenProfile").innerHTML = `<img src="${data.avatar_url}" alt="" />`;
+        showNotice("Đã cập nhật ảnh đại diện", "success");
+      }
+    });
+
+    document.getElementById("btnAccountAuthAction").addEventListener("click", async () => {
+      if (appState.authed) { await fetch("/api/auth/logout", { method: "POST" }); appState.authed = false; }
+      document.getElementById("profileDrawer").classList.remove("open");
+      document.getElementById("authScreen").classList.add("open");
+    });
+
+    document.getElementById("btnSubmitAuth").addEventListener("click", async () => {
+      const btn = document.getElementById("btnSubmitAuth");
+      btn.disabled = true; btn.textContent = "Đang đăng nhập...";
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: document.getElementById("authIdentifierInput").value.trim(), password: document.getElementById("authPassInput").value })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          await bootApp();
+          document.getElementById("authScreen").classList.remove("open");
+        } else {
+          showNotice(data.error || "Đăng nhập thất bại", "error");
+        }
+      } finally {
+        btn.disabled = false; btn.textContent = "Đăng nhập";
+      }
+    });
+
+    async function bootApp() {
+      const res = await fetch("/api/boot");
+      const data = await res.json();
+      appState.authed = Boolean(data.authenticated);
+      appState.myUid = data.uid || "";
+      appState.shareSlug = data.share_slug || "";
+      appState.friends = Array.isArray(data.friends) ? data.friends : [];
+      appState.conversations = Array.isArray(data.conversations) ? data.conversations : [];
+      appState.profile = data.profile || {};
+      appState.meta = Object.assign({ surface_style: "glass", theme_id: "default", lite_mode: "auto" }, data.meta || {});
+
+      document.getElementById("friendsCountText").textContent = appState.friends.length ? `${appState.friends.length} Bạn bè` : "Bạn bè";
+      document.getElementById("accountActionLabel").textContent = appState.authed ? "Đăng xuất" : "Đăng nhập";
+
+      const fn = appState.profile.first_name || "";
+      const ln = appState.profile.last_name || "";
+      const fullDisplay = `${fn} ${ln}`.trim() || appState.profile.username || "Tài khoản Locket";
+      const initials = getInitials(fullDisplay);
+
+      document.getElementById("heroFullName").textContent = fullDisplay;
+      document.getElementById("heroUsername").textContent = appState.profile.username ? `@${appState.profile.username}` : "";
+      document.getElementById("inviteLinkText").textContent = buildShareUrl();
+      document.getElementById("editFirstName").value = fn;
+      document.getElementById("editLastName").value = ln;
+      document.getElementById("editEmailInput").value = appState.profile.email_masked || "";
+      document.getElementById("editBirthdayInput").value = appState.profile.birthdate_masked || "";
+
+      if (appState.profile.avatar) {
+        document.getElementById("btnOpenProfile").innerHTML = `<img src="${appState.profile.avatar}" alt="" />`;
+        document.getElementById("heroAvatarBox").innerHTML = `<img src="${appState.profile.avatar}" alt="" />`;
+      } else {
+        document.getElementById("btnOpenProfile").textContent = initials;
+        document.getElementById("heroAvatarBox").textContent = initials;
+      }
+
+      applyAppearanceMeta();
+      renderCaptionGroups();
+      renderRecipients();
+      renderFriendsAndChats();
+      if (!appState.authed) document.getElementById("authScreen").classList.add("open");
+    }
+
+    bootApp();
+  </script>
+</body>
+</html>
