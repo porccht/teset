@@ -10,7 +10,6 @@ from locketlam.exceptions import LocketError
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SESSION_FILE = os.path.join(BASE_DIR, "locketlam_session.json")
-PRESETS_FILE = os.path.join(BASE_DIR, "locketlam", "caption_presets.json")
 CUSTOM_META_FILE = os.path.join(BASE_DIR, "user_custom_meta.json")
 
 TEMPLATE_DIR = (
@@ -183,8 +182,8 @@ def pwa_manifest():
 @app.route("/service-worker.js")
 def pwa_sw():
     sw_js = """
-const CACHE_NAME = 'tlth-locket-v2';
-self.addEventListener('install', (e) => { self.skipWaiting(); });
+const CACHE_NAME = 'tlth-locket-v3';
+self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || e.request.url.includes('/api/')) return;
@@ -740,4 +739,4 @@ def api_chat_delete():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
